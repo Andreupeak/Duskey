@@ -1,5 +1,5 @@
 import XCTest
-@testable import LuminaCore
+@testable import DuskeyCore
 
 private final class StubLocationProtocol: URLProtocol, @unchecked Sendable {
     private final class State: @unchecked Sendable {
@@ -53,7 +53,7 @@ final class LocationLookupClientTests: XCTestCase {
         XCTAssertEqual(coordinate.longitude, 13.4)
         let request = try XCTUnwrap(StubLocationProtocol.lastRequest)
         XCTAssertEqual(request.url?.absoluteString, "https://ipapi.co/json/")
-        XCTAssertEqual(request.value(forHTTPHeaderField: "User-Agent"), "Lumina")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "User-Agent"), "Duskey")
         XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
         XCTAssertNil(request.value(forHTTPHeaderField: "Authorization"))
         XCTAssertNil(request.value(forHTTPHeaderField: "Cookie"))

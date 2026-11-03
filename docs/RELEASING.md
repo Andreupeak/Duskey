@@ -1,4 +1,4 @@
-# Releasing Lumina
+# Releasing Duskey
 
 Source and downloads are published to the public GitHub repository. The default distribution
 route is a free, identity-free public beta; Developer ID signing/notarization is an optional future route.
@@ -21,7 +21,7 @@ route is a free, identity-free public beta; Developer ID signing/notarization is
 After committing reviewed source, run:
 
 ```sh
-python3 scripts/package_release.py 1.0.0-beta.1
+python3 scripts/package_release.py 1.0.0-beta.2
 ```
 
 The command builds a universal Release app in a temporary workspace outside the user's home,
@@ -44,7 +44,7 @@ files use GitHub Releases instead. Do not introduce paid resources or add billin
 ## Optional Developer ID release
 
 `./scripts/build.sh Release` creates an ad-hoc-signed universal app at
-`build/DerivedData/Build/Products/Release/Lumina.app` with `arm64` and `x86_64` slices.
+`build/DerivedData/Build/Products/Release/Duskey.app` with `arm64` and `x86_64` slices.
 It is a local verification artifact. The ad-hoc signature verifies bundle integrity; it is not
 a Developer ID identity or Apple notarization. Use the packaging command for downloads.
 
@@ -62,10 +62,10 @@ not receive signing secrets, sign binaries, upload artifacts, or publish release
 After signing, verify the actual exported app:
 
 ```sh
-codesign --verify --deep --strict --verbose=2 /path/to/exported/Lumina.app
-spctl --assess --type execute --verbose=2 /path/to/exported/Lumina.app
-xcrun stapler validate /path/to/exported/Lumina.app
-lipo -archs /path/to/exported/Lumina.app/Contents/MacOS/Lumina
+codesign --verify --deep --strict --verbose=2 /path/to/exported/Duskey.app
+spctl --assess --type execute --verbose=2 /path/to/exported/Duskey.app
+xcrun stapler validate /path/to/exported/Duskey.app
+lipo -archs /path/to/exported/Duskey.app/Contents/MacOS/Duskey
 ```
 
 Notarize and staple the distributable app/package, then run the real-device checklist in

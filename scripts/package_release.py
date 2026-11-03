@@ -39,9 +39,9 @@ def verify_app(app: Path) -> dict:
     assert info.get("LSUIElement") is True, "Missing menu-bar declaration"
     assert info.get("NSLocationUsageDescription"), "Missing macOS location purpose"
     assert info.get("NSLocationWhenInUseUsageDescription"), "Missing authorization purpose"
-    assert info.get("CFBundleIdentifier") == "Andreupeak.Lumina", "Unexpected app identity"
-    binary = contents / "MacOS/Lumina"
-    assert {path.name for path in binary.parent.iterdir()} == {"Lumina"}, "Debug-injection binaries must not ship"
+    assert info.get("CFBundleIdentifier") == "Andreupeak.Duskey", "Unexpected app identity"
+    binary = contents / "MacOS/Duskey"
+    assert {path.name for path in binary.parent.iterdir()} == {"Duskey"}, "Debug-injection binaries must not ship"
     arches = capture("lipo", "-archs", str(binary)).split()
     assert set(arches) == {"arm64", "x86_64"}, "Not a universal app"
     run("codesign", "--verify", "--deep", "--strict", str(app))
@@ -86,43 +86,43 @@ def main() -> None:
     revision = capture("git", "rev-parse", "HEAD", cwd=ROOT)
     output = ROOT / "dist" / args.version
     output.mkdir(parents=True, exist_ok=True)
-    stem = "Lumina-" + args.version
+    stem = "Duskey-" + args.version
     for suffix in [".dmg", ".zip"]:
         if (output / (stem + suffix)).exists():
             parser.error("Output already exists; choose a new version or move the previous local output")
 
     # Compile away from the user's home so paths cannot leak through compiler metadata.
-    with tempfile.TemporaryDirectory(prefix="lumina-release-", dir="/private/tmp") as temporary:
+    with tempfile.TemporaryDirectory(prefix="duskey-release-", dir="/private/tmp") as temporary:
         work = Path(temporary)
         source = work / "source"
         source.mkdir()
-        for name in ["Lumina", "Lumina.xcodeproj"]:
+        for name in ["Duskey", "Duskey.xcodeproj"]:
             shutil.copytree(ROOT / name, source / name, copy_function=copy_file,
                             ignore=shutil.ignore_patterns("xcuserdata", "*.xcuserstate", ".DS_Store"))
         with (output / "build.log").open("w") as log:
-            run("xcodebuild", "-project", str(source / "Lumina.xcodeproj"), "-scheme", "Lumina",
+            run("xcodebuild", "-project", str(source / "Duskey.xcodeproj"), "-scheme", "Duskey",
                 "-configuration", "Release", "-destination", "generic/platform=macOS",
                 "-derivedDataPath", str(work / "DerivedData"), "CODE_SIGNING_ALLOWED=NO",
                 "ARCHS=arm64 x86_64", "ONLY_ACTIVE_ARCH=NO", "SWIFT_TREAT_WARNINGS_AS_ERRORS=YES",
                 "SWIFT_SERIALIZE_DEBUGGING_OPTIONS=NO",
                 "MARKETING_VERSION=" + args.version.split("-")[0],
-                "OTHER_SWIFT_FLAGS=$(inherited) -file-prefix-map " + str(source) + "=/Lumina -debug-prefix-map " + str(source) + "=/Lumina",
+                "OTHER_SWIFT_FLAGS=$(inherited) -file-prefix-map " + str(source) + "=/Duskey -debug-prefix-map " + str(source) + "=/Duskey",
                 "build", cwd=source, log=log)
         payload = work / "payload"
         payload.mkdir()
-        app = payload / "Lumina.app"
-        shutil.copytree(work / "DerivedData/Build/Products/Release/Lumina.app", app, copy_function=copy_file)
+        app = payload / "Duskey.app"
+        shutil.copytree(work / "DerivedData/Build/Products/Release/Duskey.app", app, copy_function=copy_file)
         info_path = app / "Contents/Info.plist"
         info = plistlib.loads(info_path.read_bytes())
-        info["LuminaReleaseVersion"] = args.version
-        info["LuminaSourceRevision"] = revision
+        info["DuskeyReleaseVersion"] = args.version
+        info["DuskeySourceRevision"] = revision
         info_path.write_bytes(plistlib.dumps(info))
         resources = app / "Contents/Resources"
         copy_file(str(ROOT / "LICENSE"), str(resources / "LICENSE.txt"))
         copy_file(str(ROOT / "PRIVACY.md"), str(resources / "PRIVACY.md"))
-        run("xcrun", "strip", "-S", "-x", str(app / "Contents/MacOS/Lumina"))
+        run("xcrun", "strip", "-S", "-x", str(app / "Contents/MacOS/Duskey"))
         run("codesign", "--force", "--sign", "-", "--options", "runtime", "--timestamp=none",
-            "--entitlements", str(ROOT / "Lumina/Lumina.entitlements"), str(app))
+            "--entitlements", str(ROOT / "Duskey/Duskey.entitlements"), str(app))
         metadata = verify_app(app)
         metadata.update(version=args.version, source_revision=revision, source_dirty=dirty)
         (output / "release-metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
@@ -130,7 +130,7 @@ def main() -> None:
         copy_file(str(ROOT / "docs/INSTALL.md"), str(payload / "INSTALL.md"))
         (payload / "Applications").symlink_to("/Applications")
         run("ditto", "-c", "-k", "--keepParent", "--norsrc", "--noextattr", str(app), str(output / (stem + ".zip")))
-        run("hdiutil", "create", "-volname", "Lumina", "-srcfolder", str(payload), "-format", "UDZO",
+        run("hdiutil", "create", "-volname", "Duskey", "-srcfolder", str(payload), "-format", "UDZO",
             "-fs", "HFS+", str(output / (stem + ".dmg")))
         run("hdiutil", "verify", str(output / (stem + ".dmg")))
     checksums = []

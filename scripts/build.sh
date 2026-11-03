@@ -14,8 +14,8 @@ if [[ "$configuration" == Release ]]; then
 fi
 
 xcodebuild \
-    -project "$repo_dir/Lumina.xcodeproj" \
-    -scheme Lumina \
+    -project "$repo_dir/Duskey.xcodeproj" \
+    -scheme Duskey \
     -configuration "$configuration" \
     -destination 'generic/platform=macOS' \
     -derivedDataPath "$repo_dir/build/DerivedData" \
@@ -26,7 +26,7 @@ xcodebuild \
 
 # Complete the bundle signature without a certificate or developer account.
 # A linker-only signature is insufficient for protected services such as location.
-app_path="$repo_dir/build/DerivedData/Build/Products/$configuration/Lumina.app"
+app_path="$repo_dir/build/DerivedData/Build/Products/$configuration/Duskey.app"
 codesign --force --sign - --options runtime --timestamp=none \
-    --entitlements "$repo_dir/Lumina/Lumina.entitlements" "$app_path"
+    --entitlements "$repo_dir/Duskey/Duskey.entitlements" "$app_path"
 codesign --verify --deep --strict "$app_path"

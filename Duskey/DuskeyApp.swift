@@ -1,19 +1,19 @@
 import SwiftUI
 
 @main
-struct LuminaApp: App {
+struct DuskeyApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @ObservedObject private var controller = AutoBacklightController.shared
 
     var body: some Scene {
-        #if DEBUG && LUMINA_UI_TESTING
-        WindowGroup("Lumina UI Test") {
+        #if DEBUG && DUSKEY_UI_TESTING
+        WindowGroup("Duskey UI Test") {
             ContentView()
                 .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("--light") ? .light : .dark)
         }
         .windowResizability(.contentSize)
         #else
-        MenuBarExtra("Lumina", systemImage: controller.isNightMode
+        MenuBarExtra("Duskey", systemImage: controller.isNightMode
                      ? "moon.stars.fill" : "sun.max.fill") {
             ContentView()
         }
@@ -35,7 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         AutoBacklightController.shared.stopMonitoring()
         if AppRuntime.isUITesting {
-            UserDefaults.standard.removePersistentDomain(forName: "Lumina.UITesting")
+            UserDefaults.standard.removePersistentDomain(forName: "Duskey.UITesting")
         }
     }
 }

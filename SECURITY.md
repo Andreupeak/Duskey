@@ -5,7 +5,7 @@ There is no guaranteed response time or long-term support policy.
 
 ## Report a vulnerability
 
-Use [GitHub's private vulnerability reporting](https://github.com/Andreupeak/Lumina/security/advisories/new)
+Use [GitHub's private vulnerability reporting](https://github.com/Andreupeak/Duskey/security/advisories/new)
 if enabled for this repository. Include the affected revision, macOS version, impact, and minimal
 reproduction steps, with credentials and personal data removed. Do not attach real coordinates,
 IP addresses, provisioning profiles, or signing material.
@@ -27,7 +27,7 @@ reporting channel, without disclosing exploit details or sensitive data. No priv
 - **Optional external service:** confirmed IP lookup exposes your public IP to `ipapi.co`. TLS uses system
   certificate validation; redirects, cookies, cache, and stored credentials are disabled. Payload size,
   HTTP status, service error flags, and coordinate ranges are validated.
-- **Input:** idle detection reads only an elapsed-time counter. Lumina does not request Accessibility
+- **Input:** idle detection reads only an elapsed-time counter. Duskey does not request Accessibility
   or Input Monitoring permissions or record event contents.
 - **Hardware changes:** brightness and ambient state captured at launch are restored on normal quit.
   Forced termination, a crash, or a private framework failure cannot guarantee restoration; macOS's

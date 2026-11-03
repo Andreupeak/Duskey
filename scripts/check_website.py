@@ -49,7 +49,7 @@ def main():
         if url.scheme or url.netloc:
             if url.scheme != "https":
                 problems.append("External link must use HTTPS")
-            if attr == "src" or tag == "link" and not (url.netloc == "andreupeak.github.io" and url.path == "/Lumina/"):
+            if attr == "src" or tag == "link" and not (url.netloc == "andreupeak.github.io" and url.path == "/Duskey/"):
                 problems.append("Runtime assets must be self-hosted")
             continue
         if url.path:
@@ -87,7 +87,7 @@ def main():
                 problems.append(f"Personal local path in {path.name}")
             if path.suffix == ".png" and b"eXIf" in data:
                 problems.append(f"Embedded EXIF metadata in {path.name}")
-    if not (SITE / "assets/lumina-social.png").is_file():
+    if not (SITE / "assets/duskey-social.png").is_file():
         problems.append("Missing social sharing image")
     if problems:
         print("Website checks failed:\n" + "\n".join(f"- {item}" for item in problems))

@@ -23,7 +23,7 @@ enum LocationLookupClient {
         let url = URL(string: "https://ipapi.co/json/")!
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
         request.timeoutInterval = 12
-        request.setValue("Lumina", forHTTPHeaderField: "User-Agent")
+        request.setValue("Duskey", forHTTPHeaderField: "User-Agent")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         let (bytes, response) = try await session.bytes(for: request)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {

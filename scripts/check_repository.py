@@ -17,6 +17,20 @@ PATTERNS = {
     "credential assignment": rb"(?im)^\s*(?:api[_-]?key|secret|password|access[_-]?token)\s*[:=]\s*[\"']?[A-Za-z0-9/+_=.-]{16,}",
 }
 SECRET_SUFFIXES = {".pem", ".key", ".p8", ".p12", ".pfx", ".mobileprovision", ".provisionprofile"}
+PREVIOUS_BRAND = re.compile(rb"(?<![a-z])lumina", re.IGNORECASE)
+# Exact upgrade references are required for compatibility, not current branding.
+UPGRADE_REFERENCES = {
+    "Duskey/Core/LegacyPreferencesMigration.swift": {
+        '    static let previousDomain = "Andreupeak.Lumina"',
+    },
+    "PRIVACY.md": {
+        '`Andreupeak.Lumina` preferences domain into `Andreupeak.Duskey`. This happens locally,',
+        '`defaults delete Andreupeak.Lumina`. macOS may ask for location permission again because',
+    },
+    "docs/INSTALL.md": {
+        '1. Quit any older copy using its menu-bar **Quit** button, including the previous app named Lumina.',
+    },
+}
 
 
 def git(*args: str) -> bytes:
@@ -51,6 +65,12 @@ def main() -> int:
             problems.append(f"{name}: generated or user-specific file must not be published")
         data = path.read_bytes()
         scan(data, name, problems)
+        if PREVIOUS_BRAND.search(name.encode()):
+            problems.append(f"{name}: previous app name in a current file path")
+        if path.suffix in {".swift", ".md", ".py", ".sh", ".json", ".yml", ".html", ".js", ".css", ".pbxproj", ".xcscheme"} and name != "scripts/check_repository.py":
+            for number, line in enumerate(data.decode().splitlines(), 1):
+                if PREVIOUS_BRAND.search(line.encode()) and line not in UPGRADE_REFERENCES.get(name, set()):
+                    problems.append(f"{name}:{number}: previous app name outside an upgrade reference")
         if re.search(rb"/(?:Users|home)/[A-Za-z0-9._-]+/", data):
             problems.append(f"{name}: personal absolute filesystem path")
         if path.suffix == ".png" and b"eXIf" in data:
@@ -60,7 +80,7 @@ def main() -> int:
         if not (ROOT / name).is_file():
             problems.append(f"{name}: required public-project documentation is missing")
 
-    project = (ROOT / "Lumina.xcodeproj/project.pbxproj").read_text()
+    project = (ROOT / "Duskey.xcodeproj/project.pbxproj").read_text()
     if re.search(r"DEVELOPMENT_TEAM\s*=\s*\w", project):
         problems.append("project: do not commit a developer's signing team")
     if project.count("ENABLE_HARDENED_RUNTIME = YES;") != 2:
@@ -72,13 +92,13 @@ def main() -> int:
     if project.count("INFOPLIST_KEY_NSLocationUsageDescription =") != 2:
         problems.append("project: include the macOS location purpose string in both configurations")
     try:
-        entitlements = plistlib.loads((ROOT / "Lumina/Lumina.entitlements").read_bytes())
+        entitlements = plistlib.loads((ROOT / "Duskey/Duskey.entitlements").read_bytes())
         if entitlements != {"com.apple.security.personal-information.location": True}:
             problems.append("entitlements: allow only user-authorized location access")
     except (OSError, plistlib.InvalidFileException):
         problems.append("entitlements: missing or invalid resource-access declaration")
 
-    manifest_path = ROOT / "Lumina/PrivacyInfo.xcprivacy"
+    manifest_path = ROOT / "Duskey/PrivacyInfo.xcprivacy"
     try:
         manifest = plistlib.loads(manifest_path.read_bytes())
         required = {"NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults", "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]}

@@ -43,7 +43,7 @@ const tours = {
   solar: {
     label: "Sun Cycle", image: "app-sun-cycle.png", width: 760, height: 1252,
     title: "Let sunset be the switch.",
-    description: "Choose a night brightness and a location. Lumina calculates sunrise and sunset on your Mac, with no online solar service.",
+    description: "Choose a night brightness and a location. Duskey calculates sunrise and sunset on your Mac, with no online solar service.",
     detail: "Use manual coordinates offline or request Mac Location. This screenshot uses example Berlin coordinates, not a personal location.",
     alt: "Actual Sun Cycle panel with sample sunrise at 6:59, sunset at 16:40, and 50 percent night brightness.",
   },
@@ -55,8 +55,8 @@ const tours = {
     alt: "Actual Time Slots panel showing Evening focus, 18:00–22:00 at 50 percent, and Late reading, 22:00–01:00 at 30 percent.",
   },
   idle: {
-    label: "Inactivity Timeout", image: "app-idle.png", width: 760, height: 950,
-    title: "Leave the desk. Leave the light to Lumina.",
+    label: "Inactivity Timeout", image: "app-idle.png", width: 760, height: 952,
+    title: "Leave the desk. Leave the light to Duskey.",
     description: "Choose minutes and seconds from native menus. When you stop using your Mac for that long, the keyboard lighting turns off until input resumes.",
     detail: "A nonzero slot timeout takes priority over the global timer. Set a slot to 00:00 to use the global setting instead.",
     alt: "Actual System Control panel with Inactivity Timeout enabled at zero minutes and thirty seconds.",

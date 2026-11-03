@@ -1,6 +1,6 @@
-# Lumina public showcase
+# Duskey public showcase
 
-Published at **https://andreupeak.github.io/Lumina/**.
+Published at **https://andreupeak.github.io/Duskey/**.
 This is a buildless static site: HTML, CSS, JavaScript, and local images. It has no
 account system, analytics, cookies, browser storage, backend, external fonts, or
 runtime service requests. GitHub receives ordinary hosting requests under its own

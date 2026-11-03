@@ -62,7 +62,7 @@ def social():
     rounded_image(image, "app-system.png", (876, 85), 242, 18)
     rounded_image(image, "app-icon.png", (60, 44), 49, 12)
     draw = ImageDraw.Draw(image)
-    draw.text((123, 51), "Lumina", font=font(31, True), fill="#fff4eb")
+    draw.text((123, 51), "Duskey", font=font(31, True), fill="#fff4eb")
     tracking(draw, (62, 135), "KEYBOARD BACKLIGHT CONTROL FOR MAC", 12, spacing=1.5)
     draw.text((57, 174), "Your keyboard.", font=font(65, True), fill="#fff7f0")
     draw.text((57, 249), "In the right light.", font=font(65, True), fill="#ffc79a")
@@ -72,13 +72,13 @@ def social():
     draw.text((80, 546), "GET THE FREE BETA", font=font(12, True), fill="#2c211a")
     draw.text((249, 547), "macOS 14+ · Not Apple-notarized", font=font(12), fill="#bda899")
     draw.text((831, 602), "Real app UI · Illustrative device rendering", font=font(11), fill="#c3b6af")
-    image.save(ASSETS / "lumina-social.png", optimize=True)
+    image.save(ASSETS / "duskey-social.png", optimize=True)
 
 
 def feature(index, name, headline, description, screenshot, glow, accent):
     image = backdrop((900, 1440), (.5, .45), glow)
     draw = ImageDraw.Draw(image)
-    tracking(draw, (70, 64), f"LUMINA   /   {index:02}   /   {name}", 15, accent, 2)
+    tracking(draw, (70, 64), f"DUSKEY   /   {index:02}   /   {name}", 15, accent, 2)
     draw.multiline_text((64, 132), headline, font=font(76, True), fill="#fff6ef", spacing=5)
     draw.multiline_text((70, 334), description, font=font(24), fill="#d8cbc6", spacing=12)
     if index == 1:
@@ -95,7 +95,7 @@ def feature(index, name, headline, description, screenshot, glow, accent):
     draw.rectangle((0, 1387, 900, 1440), fill="#171519")
     draw.text((70, 1405), "Actual app interface · Sample settings", font=font(15), fill="#b5a7a5")
     draw.text((653, 1405), "FREE & OPEN SOURCE", font=font(12, True), fill=accent)
-    image.save(ASSETS / f"lumina-feature-{index}.png", optimize=True)
+    image.save(ASSETS / f"duskey-feature-{index}.png", optimize=True)
     return image
 
 
@@ -109,5 +109,5 @@ if __name__ == "__main__":
     combined = Image.new("RGB", (2400, 1280))
     for index, panel in enumerate(panels):
         combined.paste(panel.resize((800, 1280), Image.Resampling.LANCZOS), (index * 800, 0))
-    combined.save(ASSETS / "lumina-features.png", optimize=True)
+    combined.save(ASSETS / "duskey-features.png", optimize=True)
     print("Exported social cover, three feature posters, and the combined feature image.")

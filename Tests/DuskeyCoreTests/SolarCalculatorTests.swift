@@ -1,5 +1,5 @@
 import XCTest
-@testable import LuminaCore
+@testable import DuskeyCore
 
 final class SolarCalculatorTests: XCTestCase {
     private func date(_ text: String, zone: String) -> Date {

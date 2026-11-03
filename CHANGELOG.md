@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.0-beta.2 — 2026-11-03
+
+- Rename the app, bundle identifier, Xcode project, Swift package, and repository to Duskey.
+- Update the website, real app screenshots, promotional images, documentation, and download links.
+- Import existing app preferences once, preserving brightness, schedules, idle timeouts, and setup.
+- Keep current Duskey choices and never re-import forgotten locations or deleted schedules.
+- Publish universal Duskey DMG/ZIP downloads with updated checksums and source metadata.
+
 ## 1.0.0-beta.1 — 2026-10-31
 
 - Replace hover-expanded timer wheels and custom input capture with native click-to-open menus.

@@ -1,17 +1,27 @@
-# Install Lumina
+# Install Duskey
 
-Download only from [Andreupeak/Lumina releases](https://github.com/Andreupeak/Lumina/releases).
+Download only from [Andreupeak/Duskey releases](https://github.com/Andreupeak/Duskey/releases).
 This public beta is free, uses a local integrity signature, and is **not Apple-notarized**.
 It does not include a Developer ID certificate or a publisher's personal certificate details.
 macOS will normally show a first-open security warning for an Internet download.
 
-1. Quit any older Lumina using its menu-bar **Quit** button.
-2. Open the downloaded `.dmg` and drag **Lumina.app** onto **Applications**.
+1. Quit any older copy using its menu-bar **Quit** button, including the previous app named Lumina.
+2. Open the downloaded `.dmg` and drag **Duskey.app** onto **Applications**.
    If you cannot write to Applications, put the app in your own `~/Applications` folder instead.
 3. Eject the disk image. Open the installed app from Applications.
 4. The app appears as a sun or moon in the menu bar. Click it to start setup.
 
-The ZIP download is an alternative: unzip it, then move Lumina.app into Applications.
+The ZIP download is an alternative: unzip it, then move Duskey.app into Applications.
+
+## Upgrading from the previous app name
+
+Duskey has a new app name and bundle identifier. Quit the old app before opening Duskey
+so two copies do not compete for keyboard control. On its first normal launch, Duskey
+imports existing brightness settings, schedules, idle timeouts, and setup completion once.
+Existing Duskey choices take precedence. Mac Location may need permission again.
+After confirming your settings, move the previous app to Trash and replace any old Dock
+shortcuts or manually configured login items with Duskey. The old preferences remain a
+separate local backup; [PRIVACY.md](../PRIVACY.md) explains how to remove them.
 
 ## macOS first-open warning
 
@@ -44,11 +54,11 @@ keyboard is reported instead of requesting broader permissions.
 
 ## Update, quit, and uninstall
 
-Quit Lumina before replacing its app with a newer version. Your saved preferences remain local.
+Quit Duskey before replacing its app with a newer version. Your saved preferences remain local.
 An identity-free update may require another macOS first-open or location permission decision.
-Normal quit restores the keyboard state captured when Lumina launched. If the app crashes or is
+Normal quit restores the keyboard state captured when Duskey launched. If the app crashes or is
 force-quit, use macOS's keyboard-brightness controls to restore your preferred state.
 
-To uninstall, quit Lumina and move the app to Trash. To forget location before uninstalling,
+To uninstall, quit Duskey and move the app to Trash. To forget location before uninstalling,
 open Sun Cycle's location details and select **Forget Saved Location**. See the repository's
 PRIVACY.md for removing all preferences. No helper service or background login item is installed.

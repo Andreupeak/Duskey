@@ -1,25 +1,25 @@
-# Lumina
+# Duskey
 
-[![Lumina: Your keyboard. In the right light.](website/assets/lumina-social.png)](https://andreupeak.github.io/Lumina/)
+[![Duskey: Your keyboard. In the right light.](website/assets/duskey-social.png)](https://andreupeak.github.io/Duskey/)
 
 A small macOS menu-bar app for controlling your MacBook's keyboard backlight.
 Set a brightness, follow the sun, or choose the hours when your keyboard should light up.
 
-**[Explore the visual guide and screenshots →](https://andreupeak.github.io/Lumina/)**
+**[Explore the visual guide and screenshots →](https://andreupeak.github.io/Duskey/)**
 
-[![Sun Cycle, daily Time Slots, and Inactivity Timeout, illustrated with actual Lumina screenshots.](website/assets/lumina-features.png)](https://andreupeak.github.io/Lumina/#features)
+[![Sun Cycle, daily Time Slots, and Inactivity Timeout, illustrated with actual Duskey screenshots.](website/assets/duskey-features.png)](https://andreupeak.github.io/Duskey/#features)
 
-The screenshots use sample settings. The device image is an illustration; Lumina controls
+The screenshots use sample settings. The device image is an illustration; Duskey controls
 keyboard brightness, not the color of the LEDs or your screen.
 
-Lumina uses Apple's **private CoreBrightness framework**. Hardware support can change
+Duskey uses Apple's **private CoreBrightness framework**. Hardware support can change
 with macOS updates. It runs without App Sandbox and is not suitable for Mac App Store
 distribution. No administrator account, helper service, or Accessibility permission is required.
 
 ## Download and install
 
-The free public beta is available from [GitHub Releases](https://github.com/Andreupeak/Lumina/releases).
-Download the DMG, drag Lumina into Applications, eject the image, then open the installed app.
+The free public beta is available from [GitHub Releases](https://github.com/Andreupeak/Duskey/releases).
+Download the DMG, drag Duskey into Applications, eject the image, then open the installed app.
 See [installation and first-open instructions](docs/INSTALL.md).
 
 The free download has an identity-free local signature and is **not Apple-notarized**. Expect a
@@ -53,7 +53,7 @@ See [testing](docs/TESTING.md) for the validation scope and remaining hardware c
 
 ## Build and run
 
-Clone this repository, open `Lumina.xcodeproj`, choose the **Lumina** scheme and **My Mac**,
+Clone this repository, open `Duskey.xcodeproj`, choose the **Duskey** scheme and **My Mac**,
 then build and run. If Xcode asks for signing, choose your own team under Signing & Capabilities;
 no developer team is committed to the project.
 
@@ -61,11 +61,11 @@ To build locally with an identity-free signature and no developer account:
 
 ```sh
 ./scripts/build.sh Debug
-open build/DerivedData/Build/Products/Debug/Lumina.app
+open build/DerivedData/Build/Products/Debug/Duskey.app
 ```
 
 The app lives in the menu bar. Click its sun or moon icon to open settings.
-The book button reopens setup; **Quit** stops Lumina and restores the captured hardware settings.
+The book button reopens setup; **Quit** stops Duskey and restores the captured hardware settings.
 The build script completes the app-bundle signature without a personal certificate. See
 [releasing](docs/RELEASING.md) for the privacy-checked public package process.
 
@@ -96,12 +96,12 @@ you select it; only an already authorized, selected Mac Location source can refr
 Apple's Location Services may use network services.
 
 **IP Estimate** contacts `https://ipapi.co/json/` only after a separate confirmation. That provider
-receives your public IP address. Lumina never silently falls back to it, and does not repeat an
+receives your public IP address. Duskey never silently falls back to it, and does not repeat an
 IP lookup at startup. The request uses an ephemeral session without cookies, cache, or saved credentials.
 
 Coordinates are rounded to 0.1° before being saved locally, including coordinates from older versions.
 This reduces precision but does not make location anonymous. Preferences are stored unencrypted in
-macOS UserDefaults. **Sun Cycle → location details → Forget Saved Location** removes Lumina's saved
+macOS UserDefaults. **Sun Cycle → location details → Forget Saved Location** removes Duskey's saved
 coordinates and cancels pending requests. Permission revocation is managed separately in macOS settings.
 
 There are no analytics, accounts, ads, telemetry, or automatic update checks. Idle detection reads
@@ -122,13 +122,13 @@ the repository is public. It does not store paid Actions artifacts/caches or use
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [architecture](docs/ARCHITECTURE.md),
 [testing](docs/TESTING.md), and the [changelog](CHANGELOG.md).
-Report ordinary bugs in [GitHub Issues](https://github.com/Andreupeak/Lumina/issues).
+Report ordinary bugs in [GitHub Issues](https://github.com/Andreupeak/Duskey/issues).
 Please omit coordinates, IP addresses, serial numbers, and other personal information.
 
 ## License
 
-[MIT](LICENSE). Apple frameworks remain subject to Apple's terms; they are not bundled with Lumina.
+[MIT](LICENSE). Apple frameworks remain subject to Apple's terms; they are not bundled with Duskey.
 
-Lumina is an independent community project and is not endorsed by Apple. The MIT license covers
+Duskey is an independent community project and is not endorsed by Apple. The MIT license covers
 this repository's code and assets, not Apple's system frameworks. See
 [distribution and costs](docs/DISTRIBUTION.md) for the tradeoffs of this free release.

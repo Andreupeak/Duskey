@@ -6,12 +6,48 @@ final class Preferences: ObservableObject {
     static let shared: Preferences = {
         if AppRuntime.isUITesting {
             // Each UI test launch gets a fresh domain; never read the user's settings.
-            let defaults = UserDefaults(suiteName: "Lumina.UITesting")!
-            defaults.removePersistentDomain(forName: "Lumina.UITesting")
+            let defaults = UserDefaults(suiteName: "Duskey.UITesting")!
+            defaults.removePersistentDomain(forName: "Duskey.UITesting")
+            #if DEBUG && DUSKEY_UI_TESTING
+            seedShowcasePreferences(defaults)
+            #endif
             return Preferences(defaults: defaults)
         }
-        return Preferences()
+        let defaults = UserDefaults.standard
+        LegacyPreferencesMigration.apply(to: defaults)
+        return Preferences(defaults: defaults)
     }()
+
+    #if DEBUG && DUSKEY_UI_TESTING
+    // Deterministic sample data for genuine app screenshots; never compiled into releases.
+    private static func seedShowcasePreferences(_ defaults: UserDefaults) {
+        let scenarios = ["system", "sun-cycle", "time-slots", "idle"]
+        guard let scenario = scenarios.first(where: {
+            ProcessInfo.processInfo.arguments.contains("--showcase-" + $0)
+        }) else { return }
+        defaults.set(true, forKey: "hasCompletedOnboarding")
+        defaults.set(0.5, forKey: "manualBrightness")
+        defaults.set(scenario == "sun-cycle" || scenario == "time-slots", forKey: "overrideEnabled")
+        defaults.set(scenario == "time-slots" ? 1 : 0, forKey: "automationTab")
+        defaults.set(scenario == "idle", forKey: "inactivityTimeoutEnabled")
+        defaults.set(30, forKey: "inactivityTimeoutSeconds")
+        if scenario == "sun-cycle" {
+            defaults.set(52.5, forKey: "latitude")
+            defaults.set(13.4, forKey: "longitude")
+            defaults.set(true, forKey: "hasSavedLocation")
+            defaults.set(SolarLocationSource.manual.rawValue, forKey: "solarLocationSource")
+        }
+        if scenario == "time-slots" {
+            let periods = [
+                BrightnessPeriod(name: "Evening focus", startHour: 18, startMinute: 0,
+                                 endHour: 22, endMinute: 0, brightness: 0.5),
+                BrightnessPeriod(name: "Late reading", startHour: 22, startMinute: 0,
+                                 endHour: 1, endMinute: 0, brightness: 0.3)
+            ]
+            defaults.set(try? JSONEncoder().encode(periods), forKey: "customPeriods_v3")
+        }
+    }
+    #endif
 
     private let defaults: UserDefaults
     private let periodsKey = "customPeriods_v3"
@@ -81,7 +117,7 @@ final class Preferences: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        // One-time upgrade path. Earlier Lumina builds stored settings under different
+        // One-time upgrade path. Earlier Duskey builds stored settings under different
         // UserDefaults keys (`isOverridden`, `sunsetBrightness`, `sunsetUseAmbient`,
         // `manualUseAmbient`). When the keys were renamed there was no migration, so
         // upgraders silently lost their Auto/Solar setup and landed in System Control
@@ -105,7 +141,7 @@ final class Preferences: ObservableObject {
             // on the Sun Cycle tab where their restored night brightness actually applies.
             defaults.set(0, forKey: "automationTab")
             defaults.set(true, forKey: "solarEnabled")
-            // They already configured Lumina before — don't force them through onboarding again.
+            // They already configured Duskey before — don't force them through onboarding again.
             defaults.set(true, forKey: "hasCompletedOnboarding")
         }
 

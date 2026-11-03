@@ -1,5 +1,5 @@
 import XCTest
-@testable import LuminaCore
+@testable import DuskeyCore
 
 final class BrightnessPeriodTests: XCTestCase {
     private func period(_ start: Int, _ end: Int, id: UUID = UUID()) -> BrightnessPeriod {

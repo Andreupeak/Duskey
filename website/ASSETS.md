@@ -1,6 +1,6 @@
 # Showcase assets
 
-The website uses real Lumina interface captures and one generated device illustration.
+The website uses real Duskey interface captures and one generated device illustration.
 No user settings, real location requests, or hardware changes were used for these captures.
 
 ## App screenshots
@@ -24,7 +24,7 @@ Final asset: `assets/keyboard-studio.webp`.
 Generated with the built-in image-generation tool, then exported as optimized WebP.
 It is a product illustration, not a photograph, supported-hardware certification,
 or proof of a specific Mac model. White keyboard LEDs are shown; the amber and indigo
-are environmental scene lighting. Lumina does not change LED colors.
+are environmental scene lighting. Duskey does not change LED colors.
 
 Final generation prompt:
 
@@ -40,9 +40,9 @@ Constraints: no Apple logo, no brand, no watermark, no text overlays, no app int
 
 ## Promotional layouts
 
-`assets/lumina-social.png` is the 1200 × 630 social/repository cover.
-`assets/lumina-feature-1.png` through `lumina-feature-3.png` are 900 × 1440
-feature posters. `assets/lumina-features.png` is their 2400 × 1280 combined layout.
+`assets/duskey-social.png` is the 1200 × 630 social/repository cover.
+`assets/duskey-feature-1.png` through `duskey-feature-3.png` are 900 × 1440
+feature posters. `assets/duskey-features.png` is their 2400 × 1280 combined layout.
 
 These are original deterministic graphic layouts exported by
 `scripts/render_showcase.py` with Python and Pillow. They composite the actual

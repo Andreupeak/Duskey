@@ -1,5 +1,5 @@
 import XCTest
-@testable import LuminaCore
+@testable import DuskeyCore
 
 final class AutomationPolicyTests: XCTestCase {
     private var nightSlot: BrightnessPeriod {

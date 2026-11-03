@@ -1,12 +1,13 @@
 # Architecture
 
-Lumina is a SwiftUI menu-bar app. Xcode's synchronized `Lumina/` group compiles all app sources.
-`Package.swift` compiles the same `Lumina/Core/` files as a small library for hardware-independent
+Duskey is a SwiftUI menu-bar app. Xcode's synchronized `Duskey/` group compiles all app sources.
+`Package.swift` compiles the same `Duskey/Core/` files as a small library for hardware-independent
 XCTest coverage; the app does not link or download a separate copy of the library.
 
 | Area | Responsibility |
 | --- | --- |
-| `LuminaApp.swift` | Menu-bar scene, startup, and normal termination |
+| `DuskeyApp.swift` | Menu-bar scene, startup, and normal termination |
+| `Core/LegacyPreferencesMigration.swift` | One-time import of known settings from the previous app identity |
 | `ContentView.swift` | Mode selection, onboarding, schedule editing, and bounded scrolling |
 | `Views/` | Native duration/time menus, sliders, switches, and reusable styling |
 | `Core/BrightnessPeriod.swift` | Validated daily ranges, overnight intervals, and overlap checks |
@@ -46,7 +47,7 @@ while a Mac location request is active. Responses are rounded before being persi
 
 ## Test window
 
-Only a Debug build compiled with `LUMINA_UI_TESTING` replaces the menu-bar scene with a regular
+Only a Debug build compiled with `DUSKEY_UI_TESTING` replaces the menu-bar scene with a regular
 window. It uses an isolated preference domain and simulates keyboard hardware, idle input, and
 location requests. Release builds ignore the test flag. This allows UI verification without
 changing the user's keyboard state or location settings. It does not test CoreBrightness itself. `--light` selects light appearance.

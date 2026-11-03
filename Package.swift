@@ -1,14 +1,14 @@
 // swift-tools-version: 5.9
 import PackageDescription
 
-// The app compiles these same sources through Xcode's synchronized Lumina group.
+// The app compiles these same sources through Xcode's synchronized Duskey group.
 // This package makes policy, persistence, and solar calculations testable without hardware.
 let package = Package(
-    name: "LuminaCore",
+    name: "DuskeyCore",
     platforms: [.macOS(.v14)],
-    products: [.library(name: "LuminaCore", targets: ["LuminaCore"])],
+    products: [.library(name: "DuskeyCore", targets: ["DuskeyCore"])],
     targets: [
-        .target(name: "LuminaCore", path: "Lumina/Core"),
-        .testTarget(name: "LuminaCoreTests", dependencies: ["LuminaCore"])
+        .target(name: "DuskeyCore", path: "Duskey/Core"),
+        .testTarget(name: "DuskeyCoreTests", dependencies: ["DuskeyCore"])
     ]
 )

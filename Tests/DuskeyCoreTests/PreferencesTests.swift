@@ -1,5 +1,5 @@
 import XCTest
-@testable import LuminaCore
+@testable import DuskeyCore
 
 final class PreferencesTests: XCTestCase {
     @MainActor
@@ -13,7 +13,7 @@ final class PreferencesTests: XCTestCase {
     }
     @MainActor
     private func withDefaults(_ body: (UserDefaults) throws -> Void) rethrows {
-        let suite = "Lumina.Tests." + UUID().uuidString
+        let suite = "Duskey.Tests." + UUID().uuidString
         let defaults = UserDefaults(suiteName: suite)!
         defer { defaults.removePersistentDomain(forName: suite) }
         try body(defaults)

@@ -43,7 +43,7 @@ struct CoordinateField: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.caption2.weight(.semibold))
-                .foregroundStyle(LuminaText.muted)
+                .foregroundStyle(DuskeyText.muted)
             TextField(title, text: $text)
                 .textFieldStyle(.plain)
                 .font(.system(size: 15, weight: .semibold, design: .rounded))
@@ -96,7 +96,7 @@ struct BrightnessRow: View {
                 Spacer()
                 Text(value == 0 ? "Off" : "\(Int((value * 100).rounded()))%")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(value == 0 ? LuminaText.soft : .primary)
+                    .foregroundStyle(value == 0 ? DuskeyText.soft : .primary)
                     .monospacedDigit()
                     .contentTransition(.numericText())
                     .animation(Motion.snappy, value: value)
@@ -104,16 +104,16 @@ struct BrightnessRow: View {
             HStack(spacing: 10) {
                 Image(systemName: "sun.min")
                     .font(.caption2)
-                    .foregroundStyle(LuminaText.faint)
+                    .foregroundStyle(DuskeyText.faint)
                 BrightnessSlider(value: $value, tint: tint, onEditing: onEditing)
                 Image(systemName: "sun.max.fill")
                     .font(.caption2)
-                    .foregroundStyle(LuminaText.faint)
+                    .foregroundStyle(DuskeyText.faint)
             }
             if let subtitle {
                 Text(subtitle)
                     .font(.caption2)
-                    .foregroundStyle(LuminaText.soft)
+                    .foregroundStyle(DuskeyText.soft)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -131,7 +131,7 @@ struct ToggleRow: View {
         HStack(spacing: 12) {
             Image(systemName: systemImage)
                 .font(.body)
-                .foregroundStyle(isOn ? AnyShapeStyle(tint) : AnyShapeStyle(LuminaText.soft))
+                .foregroundStyle(isOn ? AnyShapeStyle(tint) : AnyShapeStyle(DuskeyText.soft))
                 .frame(width: 22)
                 .animation(Motion.snappy, value: isOn)
             VStack(alignment: .leading, spacing: 1) {
@@ -139,7 +139,7 @@ struct ToggleRow: View {
                 if let subtitle {
                     Text(subtitle)
                         .font(.caption2)
-                        .foregroundStyle(LuminaText.soft)
+                        .foregroundStyle(DuskeyText.soft)
                 }
             }
             Spacer(minLength: 8)
@@ -168,7 +168,7 @@ struct SegmentedTabs<T: Hashable>: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 7)
-                    .foregroundStyle(selected ? AnyShapeStyle(.white) : AnyShapeStyle(LuminaText.muted))
+                    .foregroundStyle(selected ? AnyShapeStyle(.white) : AnyShapeStyle(DuskeyText.muted))
                     .background {
                         if selected {
                             Capsule()
@@ -215,7 +215,7 @@ struct ModeSwitch: View {
             }
             .padding(.horizontal, 9)
             .padding(.vertical, 5)
-            .foregroundStyle(active ? AnyShapeStyle(.white) : AnyShapeStyle(LuminaText.muted))
+            .foregroundStyle(active ? AnyShapeStyle(.white) : AnyShapeStyle(DuskeyText.muted))
             .background {
                 if active {
                     Capsule().fill(tint.gradient)

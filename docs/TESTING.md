@@ -30,22 +30,27 @@ It is deliberately limited and does not replace a dedicated secret scanner or a 
 Build a Debug-only test copy with a separate bundle identifier:
 
 ```sh
-xcodebuild -project Lumina.xcodeproj -scheme Lumina -configuration Debug \
+xcodebuild -project Duskey.xcodeproj -scheme Duskey -configuration Debug \
   -destination 'platform=macOS' -derivedDataPath build/UITesting \
-  PRODUCT_BUNDLE_IDENTIFIER=org.lumina.UITesting \
-  'SWIFT_ACTIVE_COMPILATION_CONDITIONS=DEBUG LUMINA_UI_TESTING' \
+  PRODUCT_BUNDLE_IDENTIFIER=org.duskey.UITesting \
+  'SWIFT_ACTIVE_COMPILATION_CONDITIONS=DEBUG DUSKEY_UI_TESTING' \
   CODE_SIGNING_ALLOWED=NO build
 codesign --force --sign - --options runtime --timestamp=none \
-  --entitlements Lumina/Lumina.entitlements build/UITesting/Build/Products/Debug/Lumina.app
-open build/UITesting/Build/Products/Debug/Lumina.app
+  --entitlements Duskey/Duskey.entitlements build/UITesting/Build/Products/Debug/Duskey.app
+open build/UITesting/Build/Products/Debug/Duskey.app
 ```
 
-This displays the real settings views in a regular window. It uses only `Lumina.UITesting`
+This displays the real settings views in a regular window. It uses only `Duskey.UITesting`
 preferences, resets them on launch, and deletes them on normal quit. Hardware and location are
 simulated by default; the IP lookup confirmation still appears, but a confirmed lookup returns sample data.
 The Debug-only `--test-mac-location` argument allows an explicitly consented real Mac Location test,
 still using isolated preferences. `--light` selects light appearance. No coordinates should be logged.
 The installed app and its preferences are not modified. Do not use this build for hardware validation.
+
+For reproducible website captures, launch this isolated build with one of
+`--showcase-system`, `--showcase-sun-cycle`, `--showcase-time-slots`, or `--showcase-idle`.
+These Debug-only fixtures seed the sample settings described in `website/ASSETS.md`.
+They never read existing app preferences, access keyboard hardware, or request location.
 
 Check setup navigation, each mode, all menus, adding/editing/deleting slots, invalid and overlapping
 ranges, scrolling to the bottom, keyboard navigation, and light/dark appearance. Verify that closed
@@ -65,10 +70,17 @@ timer menus keep their values when the surrounding panel scrolls; open menus scr
 
 ## Validation record
 
-Validation dates: 2026-10-23 and 2026-10-31. Toolchain: Xcode 27, Swift 6.4, macOS 27, Apple silicon.
-The core suite has 60 passing XCTest cases. Local Debug and universal Release builds pass with
+Validation dates: 2026-10-23, 2026-10-31, and 2026-11-03. Toolchain: Xcode 27, Swift 6.4, macOS 27, Apple silicon.
+The renamed core suite has 65 passing XCTest cases, including five preference-domain migration tests.
+Local Debug and universal Release builds pass with
 Swift warnings treated as errors. The working files and available Git history were checked for
 known credential patterns; none were found. This is not an exhaustive security audit.
+
+The 2026-11-03 rename was also checked in the isolated native UI: renamed setup and settings,
+brightness and ambient controls, Sun Cycle with sample coordinates, Time Slots editing and Save,
+and inactivity timer controls. All four website screenshots and derived promotional layouts were
+recaptured or regenerated with Duskey branding. The previous preferences identifier is retained
+only for the one-time import and documented upgrade/removal instructions.
 
 On the real Mac keyboard, read/write checks passed for fixed brightness, off, ambient enable/disable,
 invalid brightness rejection, and restoration of the original state. The installed app was briefly

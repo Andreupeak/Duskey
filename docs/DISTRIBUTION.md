@@ -1,7 +1,7 @@
 # Free distribution, privacy, and limitations
 
-Lumina is published as a free community project on the public
-[Andreupeak/Lumina repository](https://github.com/Andreupeak/Lumina), with downloads in GitHub Releases.
+Duskey is published as a free community project on the public
+[Andreupeak/Duskey repository](https://github.com/Andreupeak/Duskey), with downloads in GitHub Releases.
 There is no subscription, server, custom domain, payment service, or automatic update service.
 
 ## Costs
@@ -36,15 +36,15 @@ only after confirmation. Location testing and public validation records must nev
 ## CoreBrightness and licensing
 
 CoreBrightness is an internal Apple interface. It is not maintained as a public compatibility
-contract, so an OS update can break support. Lumina checks its method signatures and refuses
+contract, so an OS update can break support. Duskey checks its method signatures and refuses
 unknown calling conventions rather than calling them unsafely. That reduces compatibility risk;
 it cannot remove the dependency or guarantee every Mac will work.
 
 Apple's [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/#software-requirements)
-require public APIs for App Store apps. Lumina's release route is independent macOS distribution,
+require public APIs for App Store apps. Duskey's release route is independent macOS distribution,
 without an App Store submission or a claim of Apple endorsement. Apple's applicable software and
 developer agreements still matter; an MIT license is not permission to redistribute Apple's frameworks.
-Lumina loads the system-installed framework and does not include it in the download.
+Duskey loads the system-installed framework and does not include it in the download.
 
 The repository uses the [MIT license](../LICENSE), including its warranty disclaimer. There are no
 third-party runtime packages, bundled Apple frameworks, paid fonts, analytics SDKs, or copied SDK headers.

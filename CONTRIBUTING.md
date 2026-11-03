@@ -5,7 +5,7 @@ Please keep discussion respectful and describe concrete behavior and reproductio
 
 ## Development
 
-Use macOS with Xcode 16 or later. Open `Lumina.xcodeproj` and select the Lumina scheme.
+Use macOS with Xcode 16 or later. Open `Duskey.xcodeproj` and select the Duskey scheme.
 The app has no external runtime package dependencies. Choose your own signing team locally
 if needed; do not commit that selection, provisioning material, or Xcode user state.
 

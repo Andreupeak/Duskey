@@ -85,7 +85,7 @@ final class AutoBacklightController: ObservableObject {
     func stopMonitoring() {
         suspendMonitoring()
         sun.cancelPendingRequests()
-        // Restore the state captured before Lumina took control, on a normal quit.
+        // Restore the state captured before Duskey took control, on a normal quit.
         if let originalBrightness {
             keyboard.setAutoBrightnessEnabled(false)
             keyboard.setBrightness(originalBrightness)

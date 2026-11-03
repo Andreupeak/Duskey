@@ -1,6 +1,6 @@
 import XCTest
 import CoreLocation
-@testable import LuminaCore
+@testable import DuskeyCore
 
 final class LocationPrivacyTests: XCTestCase {
     func testMacGrantedAuthorizationStateIsAccepted() {

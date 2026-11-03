@@ -1,7 +1,7 @@
 import SwiftUI
 import AppKit
 
-enum LuminaText {
+enum DuskeyText {
     static let muted = Color.secondary
     static let soft = Color.secondary.opacity(0.85)
     static let faint = Color.secondary.opacity(0.65)
@@ -47,7 +47,7 @@ struct ContentView: View {
     private var customActive: Bool { prefs.overrideEnabled }
 
     private var versionLabel: String {
-        Bundle.main.object(forInfoDictionaryKey: "LuminaReleaseVersion") as? String
+        Bundle.main.object(forInfoDictionaryKey: "DuskeyReleaseVersion") as? String
             ?? Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0.0"
     }
 
@@ -69,7 +69,7 @@ struct ContentView: View {
             Button("Look Up Location") { sun.requestApproximateLocationFromInternet() }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("This contacts ipapi.co, which receives your public IP address and may retain request logs. Lumina saves rounded coordinates on this Mac. This lookup runs only when you request it. You can use Mac location or manual coordinates instead.")
+            Text("This contacts ipapi.co, which receives your public IP address and may retain request logs. Duskey saves rounded coordinates on this Mac. This lookup runs only when you request it. You can use Mac location or manual coordinates instead.")
         }
         .animation(Motion.smooth, value: prefs.hasCompletedOnboarding)
         .onChange(of: draft) { _, _ in overlapWarning = false }
@@ -127,11 +127,11 @@ struct ContentView: View {
             .animation(Motion.bouncy, value: controller.isNightMode)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Lumina").font(.headline)
+                Text("Duskey").font(.headline)
                 HStack(spacing: 5) {
                     Circle().fill(statusColor).frame(width: 6, height: 6)
                     Text(controller.currentStatus)
-                        .font(.caption2).foregroundStyle(LuminaText.muted)
+                        .font(.caption2).foregroundStyle(DuskeyText.muted)
                         .monospacedDigit()
                         .contentTransition(.numericText())
                         .animation(Motion.snappy, value: controller.currentStatus)
@@ -244,7 +244,7 @@ struct ContentView: View {
                     HStack {
                         Text("Timeout duration")
                             .font(.callout)
-                            .foregroundColor(LuminaText.muted)
+                            .foregroundColor(DuskeyText.muted)
                         Spacer()
                         
                         DurationPicker(
@@ -254,7 +254,7 @@ struct ContentView: View {
                     }
                     .transition(.move(edge: .top).combined(with: .opacity))
                     Text("00:00 disables idle dimming. Slot timeouts take priority.")
-                        .font(.caption2).foregroundStyle(LuminaText.muted)
+                        .font(.caption2).foregroundStyle(DuskeyText.muted)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -267,12 +267,12 @@ struct ContentView: View {
         VStack(spacing: 12) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Active window").font(.caption2).foregroundStyle(LuminaText.muted)
+                    Text("Active window").font(.caption2).foregroundStyle(DuskeyText.muted)
                     Text(sun.activeWindowLabel)
                         .font(.title3.weight(.semibold))
                         .monospacedDigit()
                     Text("On from sunset to sunrise; off during daylight.")
-                        .font(.caption2).foregroundStyle(LuminaText.soft)
+                        .font(.caption2).foregroundStyle(DuskeyText.soft)
                 }
                 Spacer(minLength: 4)
                 Image(systemName: locationPillIcon)
@@ -303,7 +303,7 @@ struct ContentView: View {
                     .controlSize(.small)
 
                     Text("IP Estimate contacts ipapi.co only after confirmation. Mac Location uses Apple's Location Services.")
-                        .font(.caption2).foregroundStyle(LuminaText.muted)
+                        .font(.caption2).foregroundStyle(DuskeyText.muted)
                     Link("IP provider privacy policy", destination: URL(string: "https://ipapi.co/privacy/")!)
                         .font(.caption2)
 
@@ -313,7 +313,7 @@ struct ContentView: View {
                             CoordinateField(title: "Longitude", text: $manualLongitude)
                         }
                         Text("Latitude −90…90; longitude −180…180.")
-                            .font(.caption2).foregroundStyle(LuminaText.muted)
+                            .font(.caption2).foregroundStyle(DuskeyText.muted)
                         Button("Save Manual Location") {
                             if let coordinate = manualCoordinate,
                                sun.useManualCoordinates(latitude: coordinate.latitude, longitude: coordinate.longitude) {
@@ -329,7 +329,7 @@ struct ContentView: View {
                     }
                     if prefs.hasSavedLocation {
                         Text("Saved region: \(String(format: "%.1f, %.1f", prefs.latitude, prefs.longitude)). Rounded to 0.1° and stored on this Mac.")
-                            .font(.caption2).foregroundStyle(LuminaText.muted)
+                            .font(.caption2).foregroundStyle(DuskeyText.muted)
                         Button("Forget Saved Location", role: .destructive) {
                             sun.clearSavedLocation()
                             showManualLocationEditor = false
@@ -349,7 +349,7 @@ struct ContentView: View {
                         .foregroundColor(.orange)
                     Text(lastError)
                         .font(.caption2)
-                        .foregroundColor(LuminaText.muted)
+                        .foregroundColor(DuskeyText.muted)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
@@ -368,7 +368,7 @@ struct ContentView: View {
                     VStack(alignment: .leading) {
                         Text("Sunrise")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(LuminaText.muted)
+                            .foregroundColor(DuskeyText.muted)
                         Text(sun.sunriseLabel)
                             .font(.subheadline)
                             .bold()
@@ -383,7 +383,7 @@ struct ContentView: View {
                     VStack(alignment: .leading) {
                         Text("Sunset")
                             .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(LuminaText.muted)
+                            .foregroundColor(DuskeyText.muted)
                         Text(sun.sunsetLabel)
                             .font(.subheadline)
                             .bold()
@@ -411,7 +411,7 @@ struct ContentView: View {
                 Text("NIGHTTIME BRIGHTNESS")
                     .font(.caption2)
                     .fontWeight(.black)
-                    .foregroundColor(LuminaText.muted)
+                    .foregroundColor(DuskeyText.muted)
 
                 BrightnessRow(
                     title: "Brightness",
@@ -444,7 +444,7 @@ struct ContentView: View {
                 Spacer()
                 if !prefs.customPeriods.isEmpty {
                     Text("\(prefs.customPeriods.count)/3")
-                        .font(.caption2.weight(.bold)).foregroundStyle(LuminaText.muted)
+                        .font(.caption2.weight(.bold)).foregroundStyle(DuskeyText.muted)
                         .padding(.horizontal, 7).padding(.vertical, 2)
                         .background(Color.primary.opacity(0.08), in: Capsule())
                 }
@@ -513,7 +513,7 @@ struct ContentView: View {
                     Text(timeStr(period.endHour, period.endMinute))
                 }
                 .font(.caption.weight(.semibold).monospacedDigit())
-                .foregroundStyle(LuminaText.muted)
+                .foregroundStyle(DuskeyText.muted)
                 .lineLimit(1)
                 .minimumScaleFactor(0.86)
             }
@@ -531,7 +531,7 @@ struct ContentView: View {
                 )
 
             Button { beginEdit(period) } label: {
-                Image(systemName: "pencil").font(.caption).foregroundStyle(LuminaText.muted)
+                Image(systemName: "pencil").font(.caption).foregroundStyle(DuskeyText.muted)
                     .frame(width: 26, height: 26)
                     .background(Color.primary.opacity(0.06), in: Circle())
             }
@@ -562,7 +562,7 @@ struct ContentView: View {
         VStack(spacing: 12) {
             HStack {
                 Text(isNew ? "New slot" : "Edit slot")
-                    .font(.caption.weight(.semibold)).foregroundStyle(LuminaText.muted)
+                    .font(.caption.weight(.semibold)).foregroundStyle(DuskeyText.muted)
                 Spacer()
                 TextField("Name", text: Binding(
                     get: { draft?.name ?? "" },
@@ -581,7 +581,7 @@ struct ContentView: View {
                 timeColumn(title: "Start",
                            hour: Binding(get: { draft?.startHour ?? 0 }, set: { draft?.startHour = $0 }),
                            minute: Binding(get: { draft?.startMinute ?? 0 }, set: { draft?.startMinute = $0 }))
-                Image(systemName: "arrow.right").font(.caption).foregroundStyle(LuminaText.faint)
+                Image(systemName: "arrow.right").font(.caption).foregroundStyle(DuskeyText.faint)
                 timeColumn(title: "End",
                            hour: Binding(get: { draft?.endHour ?? 0 }, set: { draft?.endHour = $0 }),
                            minute: Binding(get: { draft?.endMinute ?? 0 }, set: { draft?.endMinute = $0 }))
@@ -611,7 +611,7 @@ struct ContentView: View {
                         .foregroundStyle(.primary)
                     Text("00:00 uses the global inactivity setting")
                         .font(.caption2)
-                        .foregroundStyle(LuminaText.muted)
+                        .foregroundStyle(DuskeyText.muted)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer()
@@ -653,10 +653,10 @@ struct ContentView: View {
 
     private func timeColumn(title: String, hour: Binding<Int>, minute: Binding<Int>) -> some View {
         VStack(spacing: 3) {
-            Text(title).font(.caption2).foregroundStyle(LuminaText.muted)
+            Text(title).font(.caption2).foregroundStyle(DuskeyText.muted)
             HStack(spacing: 2) {
                 NumberMenuPicker(title: "\(title) hour", selection: hour, range: 0...23, width: 54)
-                Text(":").foregroundStyle(LuminaText.muted)
+                Text(":").foregroundStyle(DuskeyText.muted)
                 NumberMenuPicker(title: "\(title) minute", selection: minute, range: 0...59, width: 54)
             }
         }
@@ -735,11 +735,11 @@ struct ContentView: View {
     private var unavailableView: some View {
         VStack(spacing: 8) {
             Image(systemName: "keyboard.badge.exclamationmark")
-                .font(.largeTitle).foregroundStyle(LuminaText.muted)
+                .font(.largeTitle).foregroundStyle(DuskeyText.muted)
             Text("No keyboard backlight detected")
                 .font(.callout.weight(.medium))
             Text("This Mac has no controllable keyboard backlight.")
-                .font(.caption).foregroundStyle(LuminaText.muted)
+                .font(.caption).foregroundStyle(DuskeyText.muted)
                 .multilineTextAlignment(.center)
         }
         .padding(28)
@@ -767,7 +767,7 @@ struct ContentView: View {
                 }) {
                     Image(systemName: "book.closed.fill")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(LuminaText.muted)
+                        .foregroundColor(DuskeyText.muted)
                         .frame(width: 22, height: 22)
                         .background(Color.primary.opacity(0.06), in: Circle())
                 }
@@ -775,7 +775,7 @@ struct ContentView: View {
                 .help("Reopen Setup Onboarding")
                 .accessibilityLabel("Reopen setup")
                 
-                Text("v" + versionLabel).font(.caption2).foregroundStyle(LuminaText.faint)
+                Text("v" + versionLabel).font(.caption2).foregroundStyle(DuskeyText.faint)
             }
         }
         .padding(.horizontal, 16)
@@ -792,13 +792,13 @@ struct ContentView: View {
                 Image(systemName: "keyboard.badge.ellipsis")
                     .font(.title2)
                     .foregroundColor(.accentColor)
-                Text("Lumina Setup")
+                Text("Duskey Setup")
                     .font(.headline)
                     .fontWeight(.bold)
                 Spacer()
                 Text("\(onboardingPage + 1) / 5")
                     .font(.caption2.weight(.bold))
-                    .foregroundColor(LuminaText.muted)
+                    .foregroundColor(DuskeyText.muted)
                     .padding(.horizontal, 8).padding(.vertical, 3)
                     .background(Capsule().fill(Color.primary.opacity(0.06)))
             }
@@ -892,12 +892,12 @@ struct ContentView: View {
                 .symbolRenderingMode(.hierarchical)
                 .padding(.top, 10)
 
-            Text("Welcome to Lumina")
+            Text("Welcome to Duskey")
                 .font(.title3.weight(.bold))
 
             Text("Set your MacBook keyboard brightness, follow the sun, or create up to three daily time slots. Add an inactivity timeout to turn the backlight off while you are away.")
                 .font(.caption)
-                .foregroundColor(LuminaText.muted)
+                .foregroundColor(DuskeyText.muted)
                 .multilineTextAlignment(.center)
                 .lineSpacing(2)
         }
@@ -915,7 +915,7 @@ struct ContentView: View {
 
             Text("Solar calculations run on your Mac. Mac Location asks macOS for a location; coordinates are rounded and saved locally. You can skip this and enter a location later, or use Time Slots without a location.")
                 .font(.caption2)
-                .foregroundColor(LuminaText.muted)
+                .foregroundColor(DuskeyText.muted)
                 .multilineTextAlignment(.center)
 
             Button(action: {
@@ -949,9 +949,9 @@ struct ContentView: View {
             Text("System Brightness")
                 .font(.callout.weight(.bold))
 
-            Text("Choose the brightness for System Control. Lumina remembers this level. Periodic mode uses your Sun Cycle or Time Slots settings instead.")
+            Text("Choose the brightness for System Control. Duskey remembers this level. Periodic mode uses your Sun Cycle or Time Slots settings instead.")
                 .font(.caption2)
-                .foregroundColor(LuminaText.muted)
+                .foregroundColor(DuskeyText.muted)
                 .multilineTextAlignment(.center)
 
             BrightnessRow(
@@ -974,9 +974,9 @@ struct ContentView: View {
             Text("Private Hardware Interface")
                 .font(.callout.weight(.bold))
 
-            Text("Lumina uses the private CoreBrightness framework to control supported keyboards. Availability can change with macOS updates. The app runs without App Sandbox and needs no administrator access.")
+            Text("Duskey uses the private CoreBrightness framework to control supported keyboards. Availability can change with macOS updates. The app runs without App Sandbox and needs no administrator access.")
                 .font(.caption2)
-                .foregroundColor(LuminaText.muted)
+                .foregroundColor(DuskeyText.muted)
                 .multilineTextAlignment(.center)
 
             // Diagnostic Badge
@@ -1005,14 +1005,14 @@ struct ContentView: View {
 
             Text("Click the minutes or seconds menu to choose a timeout. Mouse, trackpad, and keyboard use the same controls. A global timeout of 00:00 disables idle dimming; a slot timeout of 00:00 uses the global setting.")
                 .font(.caption2)
-                .foregroundColor(LuminaText.muted)
+                .foregroundColor(DuskeyText.muted)
                 .multilineTextAlignment(.center)
 
             // Mini Interactive Demo
             HStack(spacing: 8) {
                 Text("Timeout:")
                     .font(.caption2)
-                    .foregroundColor(LuminaText.muted)
+                    .foregroundColor(DuskeyText.muted)
                 DurationPicker(
                     minutes: $demoMinutes,
                     seconds: $demoSeconds

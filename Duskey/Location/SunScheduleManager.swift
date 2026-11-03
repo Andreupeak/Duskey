@@ -214,7 +214,7 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
             guard let self, self.isLocating else { return }
             self.cancelPendingRequests()
             self.lastError = waitingForAuthorization
-                ? "Location permission is still pending. Bring Lumina to the front and try Mac Location again, or enter coordinates manually."
+                ? "Location permission is still pending. Bring Duskey to the front and try Mac Location again, or enter coordinates manually."
                 : "Your Mac did not return a location. Try again or enter coordinates manually."
         }
         locationTimeoutWorkItem = workItem
