@@ -45,7 +45,7 @@ const tours = {
     title: "Let sunset be the switch.",
     description: "Choose a night brightness and a location. Duskey calculates sunrise and sunset on your Mac, with no online solar service.",
     detail: "Use manual coordinates offline or request Mac Location. This screenshot uses example Berlin coordinates, not a personal location.",
-    alt: "Actual Sun Cycle panel with sample sunrise at 6:59, sunset at 16:40, and 50 percent night brightness.",
+    alt: "Actual Sun Cycle panel with sample sunrise at 7:04, sunset at 16:35, and 50 percent night brightness.",
   },
   slots: {
     label: "Time Slots", image: "app-time-slots.png", width: 760, height: 1252,
