@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- Release the settings popover, SwiftUI hierarchy, and native menus when closed; retain unsaved slot edits and setup progress separately.
+- Replace continuous full-policy polling and per-tick Tasks with one reusable timer driven by policy, preview, and idle deadlines.
+- Cache policy/status results and solar refresh bounds; avoid temporary interval arrays and duplicate schedule persistence.
+- Keep responsive idle restoration, local minute/DST boundaries, three-second previews, and original hardware restoration.
+- Deduplicate hardware output independently of status labels and back off retries after control failures.
+- Create Core Location only when needed and replace queued location timeouts with an invalidatable timer.
+- Implementation is source-reviewed only; no build, app launch, tests, or memory profiling were performed for this change.
+
 ## 1.0.0-beta.2 — 2026-11-03
 
 - Rename the app, bundle identifier, Xcode project, Swift package, and repository to Duskey.

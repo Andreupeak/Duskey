@@ -205,9 +205,9 @@ final class Preferences: ObservableObject {
     @discardableResult
     func setCoordinates(latitude: Double, longitude: Double) -> Bool {
         guard let coordinate = LocationCoordinate(latitude: latitude, longitude: longitude)?.roundedForStorage else { return false }
-        self.latitude = coordinate.latitude
-        self.longitude = coordinate.longitude
-        hasSavedLocation = true
+        if self.latitude != coordinate.latitude { self.latitude = coordinate.latitude }
+        if self.longitude != coordinate.longitude { self.longitude = coordinate.longitude }
+        if !hasSavedLocation { hasSavedLocation = true }
         return true
     }
 
@@ -242,12 +242,13 @@ final class Preferences: ObservableObject {
         guard period.isValid, customPeriods.count < 3 else { return false }
         guard !customPeriods.contains(where: { $0.id == period.id }),
               overlappingPeriod(with: period) == nil else { return false }
-        customPeriods.append(period)
-        sortPeriods()
+        // Publish and encode one final array instead of separate append/sort writes.
+        customPeriods = (customPeriods + [period]).sorted { $0.startMinutes < $1.startMinutes }
         return true
     }
 
     func removePeriod(id: UUID) {
+        guard customPeriods.contains(where: { $0.id == id }) else { return }
         customPeriods.removeAll { $0.id == id }
     }
 
@@ -257,14 +258,12 @@ final class Preferences: ObservableObject {
             return false
         }
         if let idx = customPeriods.firstIndex(where: { $0.id == period.id }) {
-            customPeriods[idx] = period
-            sortPeriods()
+            guard customPeriods[idx] != period else { return true }
+            var updated = customPeriods
+            updated[idx] = period
+            customPeriods = updated.sorted { $0.startMinutes < $1.startMinutes }
             return true
         }
         return false
-    }
-
-    private func sortPeriods() {
-        customPeriods.sort { $0.startMinutes < $1.startMinutes }
     }
 }

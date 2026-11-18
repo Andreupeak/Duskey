@@ -92,8 +92,12 @@ struct BrightnessPeriod: Identifiable, Codable, Equatable {
     }
 
     func contains(minuteOfDay m: Int) -> Bool {
-        guard (0..<1440).contains(m) else { return false }
-        return intervals.contains { m >= $0.0 && m < $0.1 }
+        guard hasValidTimes, (0..<1440).contains(m) else { return false }
+        let start = startMinutes
+        let end = endMinutes
+        guard start != end else { return false }
+        // Membership is a comparison, with no temporary interval array.
+        return start < end ? m >= start && m < end : m >= start || m < end
     }
 
     func overlaps(_ other: BrightnessPeriod) -> Bool {

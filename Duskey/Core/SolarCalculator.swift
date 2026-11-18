@@ -17,6 +17,18 @@ struct SolarEvents: Equatable {
             return sinceSunrise >= sunset.timeIntervalSince(sunrise)
         }
     }
+
+    /// Match isNight's repeating solar-day interpretation, including coordinates
+    /// whose sunrise/sunset fall on an adjacent local calendar day. The manager
+    /// recalculates the events at local midnight before using tomorrow's cycle.
+    func nextTransition(after date: Date) -> Date? {
+        guard condition == .normal, let sunrise, let sunset else { return nil }
+        func nextOccurrence(of event: Date) -> Date {
+            let cycles = floor(date.timeIntervalSince(event) / 86_400) + 1
+            return event.addingTimeInterval(cycles * 86_400)
+        }
+        return min(nextOccurrence(of: sunrise), nextOccurrence(of: sunset))
+    }
 }
 
 enum SolarCalculator {

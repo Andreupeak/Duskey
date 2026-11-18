@@ -7,27 +7,17 @@ enum DuskeyText {
     static let faint = Color.secondary.opacity(0.65)
 }
 
+@MainActor
 struct ContentView: View {
     @ObservedObject private var prefs = Preferences.shared
     @ObservedObject private var controller = AutoBacklightController.shared
     @ObservedObject private var sun = SunScheduleManager.shared
 
-    // Onboarding Wizard Navigation
-    @State private var onboardingPage = 0
+    @ObservedObject private var state: ContentViewState
 
-    // Custom-period editing state
-    @State private var editingID: UUID? = nil
-    @State private var draft: BrightnessPeriod? = nil
-    @State private var isAddingNew = false
-    @State private var overlapWarning = false
-    @State private var showManualLocationEditor = false
-    @State private var showLocationControls = false
-
-    @State private var showApproximateLocationConsent = false
-    @State private var manualLatitude = ""
-    @State private var manualLongitude = ""
-    @State private var demoMinutes = 0
-    @State private var demoSeconds = 30
+    init(state: ContentViewState) {
+        self.state = state
+    }
 
     private var availableContentHeight: CGFloat {
         max(180, (NSScreen.main?.visibleFrame.height ?? 800) - 180)
@@ -38,8 +28,8 @@ struct ContentView: View {
     }
 
     private var manualCoordinate: LocationCoordinate? {
-        guard let latitude = Double(manualLatitude.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: ".")),
-              let longitude = Double(manualLongitude.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: ".")) else { return nil }
+        guard let latitude = Double(state.manualLatitude.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: ".")),
+              let longitude = Double(state.manualLongitude.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: ",", with: ".")) else { return nil }
         return LocationCoordinate(latitude: latitude, longitude: longitude)
     }
 
@@ -65,23 +55,21 @@ struct ContentView: View {
         }
         .frame(width: 380)
         .background(BackdropGradient(isNight: controller.isNightMode))
-        .alert("Look up location by IP?", isPresented: $showApproximateLocationConsent) {
+        .alert("Look up location by IP?", isPresented: $state.showApproximateLocationConsent) {
             Button("Look Up Location") { sun.requestApproximateLocationFromInternet() }
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This contacts ipapi.co, which receives your public IP address and may retain request logs. Duskey saves rounded coordinates on this Mac. This lookup runs only when you request it. You can use Mac location or manual coordinates instead.")
         }
         .animation(Motion.smooth, value: prefs.hasCompletedOnboarding)
-        .onChange(of: draft) { _, _ in overlapWarning = false }
+        .onChange(of: state.draft) { _, _ in
+            if state.overlapWarning { state.overlapWarning = false }
+        }
         .onDisappear(perform: collapseLocationControls)
     }
 
     private func collapseLocationControls() {
-        guard showLocationControls || showManualLocationEditor else { return }
-        withAnimation(Motion.smooth) {
-            showLocationControls = false
-            showManualLocationEditor = false
-        }
+        state.closeTransientControls()
     }
 
     // MARK: - Main Panel Layout
@@ -279,24 +267,24 @@ struct ContentView: View {
                     .font(.title2).foregroundStyle(locationPillTint)
             }
 
-            DisclosureGroup(isExpanded: $showLocationControls) {
+            DisclosureGroup(isExpanded: $state.showLocationControls) {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(spacing: 8) {
                         Button("Mac Location", systemImage: "location.fill") {
-                            showManualLocationEditor = false
+                            state.showManualLocationEditor = false
                             sun.requestMacLocation()
                         }
                         .help("Use macOS Location Services")
                         Button("IP Estimate", systemImage: "network") {
-                            showManualLocationEditor = false
-                            showApproximateLocationConsent = true
+                            state.showManualLocationEditor = false
+                            state.showApproximateLocationConsent = true
                         }
                         .help("Look up your public IP address with ipapi.co")
                         Button("Manual", systemImage: "pencil") {
                             sun.beginManualEntry()
-                            manualLatitude = prefs.hasSavedLocation ? String(format: "%.1f", prefs.latitude) : ""
-                            manualLongitude = prefs.hasSavedLocation ? String(format: "%.1f", prefs.longitude) : ""
-                            showManualLocationEditor = true
+                            state.manualLatitude = prefs.hasSavedLocation ? String(format: "%.1f", prefs.latitude) : ""
+                            state.manualLongitude = prefs.hasSavedLocation ? String(format: "%.1f", prefs.longitude) : ""
+                            state.showManualLocationEditor = true
                         }
                     }
                     .buttonStyle(.bordered)
@@ -307,17 +295,17 @@ struct ContentView: View {
                     Link("IP provider privacy policy", destination: URL(string: "https://ipapi.co/privacy/")!)
                         .font(.caption2)
 
-                    if showManualLocationEditor {
+                    if state.showManualLocationEditor {
                         HStack(spacing: 10) {
-                            CoordinateField(title: "Latitude", text: $manualLatitude)
-                            CoordinateField(title: "Longitude", text: $manualLongitude)
+                            CoordinateField(title: "Latitude", text: $state.manualLatitude)
+                            CoordinateField(title: "Longitude", text: $state.manualLongitude)
                         }
                         Text("Latitude −90…90; longitude −180…180.")
                             .font(.caption2).foregroundStyle(DuskeyText.muted)
                         Button("Save Manual Location") {
                             if let coordinate = manualCoordinate,
                                sun.useManualCoordinates(latitude: coordinate.latitude, longitude: coordinate.longitude) {
-                                showManualLocationEditor = false
+                                state.showManualLocationEditor = false
                             }
                         }
                         .buttonStyle(.borderedProminent)
@@ -332,7 +320,7 @@ struct ContentView: View {
                             .font(.caption2).foregroundStyle(DuskeyText.muted)
                         Button("Forget Saved Location", role: .destructive) {
                             sun.clearSavedLocation()
-                            showManualLocationEditor = false
+                            state.showManualLocationEditor = false
                         }
                         .font(.caption)
                     }
@@ -450,10 +438,10 @@ struct ContentView: View {
                 }
             }
 
-            if !prefs.customPeriods.isEmpty || isAddingNew {
+            if !prefs.customPeriods.isEmpty || state.isAddingNew {
                 VStack(spacing: 10) {
                     ForEach(prefs.customPeriods) { period in
-                        if editingID == period.id, draft != nil {
+                        if state.editingID == period.id, state.draft != nil {
                             periodEditor(isNew: false)
                                 .transition(.scale(scale: 0.96).combined(with: .opacity))
                         } else {
@@ -462,7 +450,7 @@ struct ContentView: View {
                         }
                     }
 
-                    if isAddingNew, draft != nil {
+                    if state.isAddingNew, state.draft != nil {
                         periodEditor(isNew: true)
                             .transition(.scale(scale: 0.96).combined(with: .opacity))
                     }
@@ -470,7 +458,7 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity)
             }
 
-            if !isAddingNew && editingID == nil && prefs.customPeriods.count < 3 {
+            if !state.isAddingNew && state.editingID == nil && prefs.customPeriods.count < 3 {
                 Button(action: beginAdd) {
                     ZStack {
                         Circle()
@@ -490,8 +478,8 @@ struct ContentView: View {
             }
         }
         .animation(Motion.smooth, value: prefs.customPeriods)
-        .animation(Motion.smooth, value: editingID)
-        .animation(Motion.smooth, value: isAddingNew)
+        .animation(Motion.smooth, value: state.editingID)
+        .animation(Motion.smooth, value: state.isAddingNew)
     }
 
     // MARK: - Row Layout
@@ -565,8 +553,8 @@ struct ContentView: View {
                     .font(.caption.weight(.semibold)).foregroundStyle(DuskeyText.muted)
                 Spacer()
                 TextField("Name", text: Binding(
-                    get: { draft?.name ?? "" },
-                    set: { draft?.name = $0 }
+                    get: { state.draft?.name ?? "" },
+                    set: { state.draft?.name = $0 }
                 ))
                 .textFieldStyle(.plain)
                 .accessibilityLabel("Time slot name")
@@ -579,28 +567,28 @@ struct ContentView: View {
 
             HStack(spacing: 6) {
                 timeColumn(title: "Start",
-                           hour: Binding(get: { draft?.startHour ?? 0 }, set: { draft?.startHour = $0 }),
-                           minute: Binding(get: { draft?.startMinute ?? 0 }, set: { draft?.startMinute = $0 }))
+                           hour: Binding(get: { state.draft?.startHour ?? 0 }, set: { state.draft?.startHour = $0 }),
+                           minute: Binding(get: { state.draft?.startMinute ?? 0 }, set: { state.draft?.startMinute = $0 }))
                 Image(systemName: "arrow.right").font(.caption).foregroundStyle(DuskeyText.faint)
                 timeColumn(title: "End",
-                           hour: Binding(get: { draft?.endHour ?? 0 }, set: { draft?.endHour = $0 }),
-                           minute: Binding(get: { draft?.endMinute ?? 0 }, set: { draft?.endMinute = $0 }))
+                           hour: Binding(get: { state.draft?.endHour ?? 0 }, set: { state.draft?.endHour = $0 }),
+                           minute: Binding(get: { state.draft?.endMinute ?? 0 }, set: { state.draft?.endMinute = $0 }))
             }
 
             BrightnessRow(
                 title: "Brightness",
-                value: Binding(get: { draft?.brightness ?? 0 }, set: { draft?.brightness = $0 }),
+                value: Binding(get: { state.draft?.brightness ?? 0 }, set: { state.draft?.brightness = $0 }),
                 tint: .indigo,
                 onEditing: { controller.previewBrightness($0) }
             )
-            .disabled(draft?.useAmbient ?? false)
-            .opacity((draft?.useAmbient ?? false) ? 0.45 : 1)
+            .disabled(state.draft?.useAmbient ?? false)
+            .opacity((state.draft?.useAmbient ?? false) ? 0.45 : 1)
 
             ToggleRow(
                 systemImage: "rays",
                 title: "Auto-Brightness",
                 subtitle: "Auto brightness in this slot",
-                isOn: Binding(get: { draft?.useAmbient ?? false }, set: { draft?.useAmbient = $0 }),
+                isOn: Binding(get: { state.draft?.useAmbient ?? false }, set: { state.draft?.useAmbient = $0 }),
                 tint: .indigo
             )
 
@@ -616,13 +604,13 @@ struct ContentView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Spacer()
                 DurationPicker(
-                    minutes: Binding(get: { draft?.timeoutMinutes ?? 0 }, set: { draft?.timeoutMinutes = $0 }),
-                    seconds: Binding(get: { draft?.timeoutSeconds ?? 0 }, set: { draft?.timeoutSeconds = $0 })
+                    minutes: Binding(get: { state.draft?.timeoutMinutes ?? 0 }, set: { state.draft?.timeoutMinutes = $0 }),
+                    seconds: Binding(get: { state.draft?.timeoutSeconds ?? 0 }, set: { state.draft?.timeoutSeconds = $0 })
                 )
             }
 
-            if overlapWarning {
-                Label(editingLimitReached ? "You can add up to 3 slots" : (draft?.isValid == false ? "Use a name and different start/end times" : "This time range overlaps another slot"), systemImage: "exclamationmark.triangle.fill")
+            if state.overlapWarning {
+                Label(editingLimitReached ? "You can add up to 3 slots" : (state.draft?.isValid == false ? "Use a name and different start/end times" : "This time range overlaps another slot"), systemImage: "exclamationmark.triangle.fill")
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(.orange)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -666,48 +654,48 @@ struct ContentView: View {
     // MARK: - Actions
     private func beginAdd() {
         guard prefs.customPeriods.count < 3 else {
-            withAnimation(Motion.snappy) { overlapWarning = true }
+            withAnimation(Motion.snappy) { state.overlapWarning = true }
             return
         }
         let candidate = suggestedNewPeriod()
-        draft = candidate
-        overlapWarning = false
+        state.draft = candidate
+        state.overlapWarning = false
         withAnimation(Motion.smooth) {
-            editingID = nil
-            isAddingNew = true
+            state.editingID = nil
+            state.isAddingNew = true
         }
     }
 
     private func beginEdit(_ period: BrightnessPeriod) {
-        draft = period
-        overlapWarning = false
+        state.draft = period
+        state.overlapWarning = false
         withAnimation(Motion.smooth) {
-            isAddingNew = false
-            editingID = period.id
+            state.isAddingNew = false
+            state.editingID = period.id
         }
     }
 
     private func saveEdit() {
-        guard let d = draft else { return }
-        let success: Bool = isAddingNew ? prefs.addPeriod(d) : prefs.updatePeriod(d)
+        guard let d = state.draft else { return }
+        let success: Bool = state.isAddingNew ? prefs.addPeriod(d) : prefs.updatePeriod(d)
         if success {
             withAnimation(Motion.smooth) {
-                editingID = nil
-                isAddingNew = false
-                draft = nil
-                overlapWarning = false
+                state.editingID = nil
+                state.isAddingNew = false
+                state.draft = nil
+                state.overlapWarning = false
             }
         } else {
-            withAnimation(Motion.snappy) { overlapWarning = true }
+            withAnimation(Motion.snappy) { state.overlapWarning = true }
         }
     }
 
     private func cancelEdit() {
         withAnimation(Motion.smooth) {
-            editingID = nil
-            isAddingNew = false
-            draft = nil
-            overlapWarning = false
+            state.editingID = nil
+            state.isAddingNew = false
+            state.draft = nil
+            state.overlapWarning = false
         }
     }
 
@@ -716,7 +704,7 @@ struct ContentView: View {
     }
 
     private var editingLimitReached: Bool {
-        isAddingNew && prefs.customPeriods.count >= 3
+        state.isAddingNew && prefs.customPeriods.count >= 3
     }
 
     private func suggestedNewPeriod() -> BrightnessPeriod {
@@ -761,7 +749,7 @@ struct ContentView: View {
                 // Tutorial Re-open Book Trigger
                 Button(action: {
                     withAnimation(Motion.smooth) {
-                        onboardingPage = 0
+                        state.onboardingPage = 0
                         prefs.hasCompletedOnboarding = false
                     }
                 }) {
@@ -796,7 +784,7 @@ struct ContentView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                 Spacer()
-                Text("\(onboardingPage + 1) / 5")
+                Text("\(state.onboardingPage + 1) / 5")
                     .font(.caption2.weight(.bold))
                     .foregroundColor(DuskeyText.muted)
                     .padding(.horizontal, 8).padding(.vertical, 3)
@@ -809,22 +797,22 @@ struct ContentView: View {
 
             ScrollView(.vertical) {
             ZStack {
-                if onboardingPage == 0 {
+                if state.onboardingPage == 0 {
                     onboardingWelcomeStep
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing).combined(with: .opacity),
                             removal: .move(edge: .leading).combined(with: .opacity)))
-                } else if onboardingPage == 1 {
+                } else if state.onboardingPage == 1 {
                     onboardingLocationStep
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing).combined(with: .opacity),
                             removal: .move(edge: .leading).combined(with: .opacity)))
-                } else if onboardingPage == 2 {
+                } else if state.onboardingPage == 2 {
                     onboardingStartupBrightnessStep
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing).combined(with: .opacity),
                             removal: .move(edge: .leading).combined(with: .opacity)))
-                } else if onboardingPage == 3 {
+                } else if state.onboardingPage == 3 {
                     onboardingHardwareStep
                         .transition(.asymmetric(
                             insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -840,15 +828,15 @@ struct ContentView: View {
             .padding(.horizontal, 18)
             }
             .frame(height: min(270, availableContentHeight))
-            .animation(Motion.smooth, value: onboardingPage)
+            .animation(Motion.smooth, value: state.onboardingPage)
 
             Divider()
 
             // Bottom Navigation Footer
             HStack {
-                if onboardingPage > 0 {
+                if state.onboardingPage > 0 {
                     Button("Back") {
-                        withAnimation(Motion.smooth) { onboardingPage -= 1 }
+                        withAnimation(Motion.smooth) { state.onboardingPage -= 1 }
                     }
                     .buttonStyle(PressableStyle())
                 }
@@ -856,7 +844,7 @@ struct ContentView: View {
                 Spacer()
 
                 Button(action: nextOnboardingStep) {
-                    Text(onboardingPage == 4 ? "Complete Setup" : "Next")
+                    Text(state.onboardingPage == 4 ? "Complete Setup" : "Next")
                         .fontWeight(.bold)
                         .padding(.horizontal, 18).padding(.vertical, 6)
                         .background(Color.indigo.gradient, in: Capsule())
@@ -870,9 +858,9 @@ struct ContentView: View {
     }
 
     private func nextOnboardingStep() {
-        if onboardingPage < 4 {
+        if state.onboardingPage < 4 {
             withAnimation(Motion.smooth) {
-                onboardingPage += 1
+                state.onboardingPage += 1
             }
         } else {
             // Write completed state to Preferences/UserDefaults
@@ -1014,8 +1002,8 @@ struct ContentView: View {
                     .font(.caption2)
                     .foregroundColor(DuskeyText.muted)
                 DurationPicker(
-                    minutes: $demoMinutes,
-                    seconds: $demoSeconds
+                    minutes: $state.demoMinutes,
+                    seconds: $state.demoSeconds
                 )
             }
             .padding(6)

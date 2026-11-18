@@ -72,6 +72,7 @@ struct BrightnessSlider: View {
         Slider(value: Binding(
             get: { AutomationPolicy.clampBrightness(value) },
             set: { newValue in
+                guard newValue != value else { return }
                 value = newValue
                 onEditing?(newValue)
             }

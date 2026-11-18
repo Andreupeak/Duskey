@@ -8,11 +8,13 @@ import Combine
 final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLocationManagerDelegate {
     static let shared = SunScheduleManager()
 
-    private let locationManager = CLLocationManager()
-    private var locationTimeoutWorkItem: DispatchWorkItem?
+    private var locationManager: CLLocationManager?
+    private var locationTimeoutTimer: Timer?
+    private var waitingForAuthorization = false
     private var approximateTask: Task<Void, Never>?
     private var approximateRequestID: UUID?
-    private var lastSolarRefreshKey: String?
+    private var solarRefreshStart = Date.distantPast
+    private(set) var nextSolarRefresh = Date.distantPast
     private var events: SolarEvents?
 
     @Published private(set) var isAuthorized = false
@@ -22,10 +24,12 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
     @Published private(set) var sunrise: Date?
     @Published private(set) var sunset: Date?
     @Published private(set) var solarCondition: SolarEvents.Condition?
+    @Published private(set) var needsSettings = false
+    @Published private(set) var sunriseLabel = "—"
+    @Published private(set) var sunsetLabel = "—"
 
-    var isNighttime: Bool? { events?.isNight(at: Date()) }
-    var sunriseLabel: String { formatTime(sunrise) }
-    var sunsetLabel: String { formatTime(sunset) }
+    func isNighttime(at date: Date) -> Bool? { events?.isNight(at: date) }
+    func nextTransition(after date: Date) -> Date? { events?.nextTransition(after: date) }
 
     var activeWindowLabel: String {
         if isLocating { return "Finding Mac location…" }
@@ -47,26 +51,19 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
         }
     }
 
-    var needsSettings: Bool {
-        locationManager.authorizationStatus == .denied || locationManager.authorizationStatus == .restricted
-    }
-
     override private init() {
         super.init()
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyKilometer
-        updateAuthorization()
         refreshSolarTimes()
     }
 
     func refreshLocationOnceAtStartup() {
-        updateAuthorization()
-        let action = LocationStartupAction.resolve(source: Preferences.shared.solarLocationSource,
+        let prefs = Preferences.shared
+        guard prefs.hasCompletedOnboarding, prefs.solarLocationSource == .precise else { return }
+        updateAuthorization(using: prepareLocationManager())
+        let action = LocationStartupAction.resolve(source: prefs.solarLocationSource,
                                                     isAuthorized: isAuthorized)
-        if Preferences.shared.hasCompletedOnboarding, action == .refreshAuthorizedMacLocation {
+        if action == .refreshAuthorizedMacLocation {
             requestMacLocation()
-        } else {
-            refreshSolarTimesIfNeeded(force: true)
         }
     }
 
@@ -78,6 +75,8 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
             lastError = "Mac location is simulated in UI test mode. Use manual coordinates."
             return
         }
+        let locationManager = prepareLocationManager()
+        updateAuthorization(using: locationManager)
         // Read the delegate-backed authorization status. Synchronous
         // locationServicesEnabled() queries can block the UI's main thread.
         switch locationManager.authorizationStatus {
@@ -99,7 +98,7 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
             DispatchQueue.main.async { [weak self] in
                 guard let self, self.isLocating,
                       Preferences.shared.solarLocationSource == .precise else { return }
-                self.locationManager.requestWhenInUseAuthorization()
+                self.locationManager?.requestWhenInUseAuthorization()
             }
         case .denied, .restricted:
             lastError = "Location access is denied. Open System Settings or enter coordinates manually."
@@ -178,11 +177,12 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
         approximateRequestID = nil
         approximateTask?.cancel()
         approximateTask = nil
-        locationTimeoutWorkItem?.cancel()
-        locationTimeoutWorkItem = nil
-        locationManager.stopUpdatingLocation()
-        isLocating = false
-        isFetchingApproximateLocation = false
+        locationTimeoutTimer?.invalidate()
+        locationTimeoutTimer = nil
+        waitingForAuthorization = false
+        locationManager?.stopUpdatingLocation()
+        if isLocating { isLocating = false }
+        if isFetchingApproximateLocation { isFetchingApproximateLocation = false }
     }
 
     func openLocationSettings() {
@@ -191,34 +191,51 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
         }
     }
 
-    func refreshSolarTimes() {
+    func refreshSolarTimes(at now: Date = Date()) {
         let prefs = Preferences.shared
         events = prefs.hasSavedLocation
-            ? SolarCalculator.calculateSunriseSunset(latitude: prefs.latitude, longitude: prefs.longitude) : nil
-        sunrise = events?.sunrise
-        sunset = events?.sunset
-        solarCondition = events?.condition
-        lastSolarRefreshKey = refreshKey
+            ? SolarCalculator.calculateSunriseSunset(latitude: prefs.latitude, longitude: prefs.longitude, date: now) : nil
+        if sunrise != events?.sunrise { sunrise = events?.sunrise }
+        if sunset != events?.sunset { sunset = events?.sunset }
+        if solarCondition != events?.condition { solarCondition = events?.condition }
+        // Labels can change with locale or time-zone offsets even when the
+        // absolute solar instants are unchanged. Format once per refresh.
+        let riseLabel = formatTime(events?.sunrise)
+        let setLabel = formatTime(events?.sunset)
+        if sunriseLabel != riseLabel { sunriseLabel = riseLabel }
+        if sunsetLabel != setLabel { sunsetLabel = setLabel }
+        let calendar = Calendar.current
+        solarRefreshStart = calendar.startOfDay(for: now)
+        nextSolarRefresh = calendar.date(byAdding: .day, value: 1, to: solarRefreshStart)
+            ?? now.addingTimeInterval(60)
+        if let transition = calendar.timeZone.nextDaylightSavingTimeTransition(after: now) {
+            nextSolarRefresh = min(nextSolarRefresh, transition)
+        }
     }
 
-    private var refreshKey: String {
-        "\(Calendar.current.startOfDay(for: Date()).timeIntervalSince1970)|\(TimeZone.current.identifier)|\(TimeZone.current.secondsFromGMT())"
-    }
-
-    func refreshSolarTimesIfNeeded(force: Bool = false) {
-        if force || lastSolarRefreshKey != refreshKey { refreshSolarTimes() }
+    func refreshSolarTimesIfNeeded(at now: Date = Date(), force: Bool = false) {
+        // Clock/time-zone notifications force a refresh. Between those and the
+        // cached day/DST boundary, the hot path needs only two Date comparisons.
+        if force || now < solarRefreshStart || now >= nextSolarRefresh { refreshSolarTimes(at: now) }
     }
 
     private func beginLocationTimeout(waitingForAuthorization: Bool = false) {
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self, self.isLocating else { return }
-            self.cancelPendingRequests()
-            self.lastError = waitingForAuthorization
-                ? "Location permission is still pending. Bring Duskey to the front and try Mac Location again, or enter coordinates manually."
-                : "Your Mac did not return a location. Try again or enter coordinates manually."
-        }
-        locationTimeoutWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + (waitingForAuthorization ? 60 : 15), execute: workItem)
+        locationTimeoutTimer?.invalidate()
+        self.waitingForAuthorization = waitingForAuthorization
+        let timer = Timer(timeInterval: waitingForAuthorization ? 60 : 15, target: self,
+                          selector: #selector(locationRequestTimedOut), userInfo: nil, repeats: false)
+        timer.tolerance = 0.5
+        locationTimeoutTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
+    }
+
+    @objc private func locationRequestTimedOut() {
+        guard isLocating else { return }
+        let wasWaitingForAuthorization = waitingForAuthorization
+        cancelPendingRequests()
+        lastError = wasWaitingForAuthorization
+            ? "Location permission is still pending. Bring Duskey to the front and try Mac Location again, or enter coordinates manually."
+            : "Your Mac did not return a location. Try again or enter coordinates manually."
     }
 
     private func formatTime(_ date: Date?) -> String {
@@ -226,12 +243,25 @@ final class SunScheduleManager: NSObject, ObservableObject, @preconcurrency CLLo
         return date.formatted(date: .omitted, time: .shortened)
     }
 
-    private func updateAuthorization() {
-        isAuthorized = LocationAuthorization.isAuthorized(locationManager.authorizationStatus)
+    private func prepareLocationManager() -> CLLocationManager {
+        if let locationManager { return locationManager }
+        // Manual/IP users do not need Core Location's manager and XPC lifecycle.
+        let manager = CLLocationManager()
+        locationManager = manager
+        manager.delegate = self
+        manager.desiredAccuracy = kCLLocationAccuracyKilometer
+        return manager
+    }
+
+    private func updateAuthorization(using manager: CLLocationManager) {
+        let authorized = LocationAuthorization.isAuthorized(manager.authorizationStatus)
+        let denied = manager.authorizationStatus == .denied || manager.authorizationStatus == .restricted
+        if isAuthorized != authorized { isAuthorized = authorized }
+        if needsSettings != denied { needsSettings = denied }
     }
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        updateAuthorization()
+        updateAuthorization(using: manager)
         // Initial delegate callbacks and later permission changes must not select a
         // source or start a request unless the user is waiting for this request.
         guard isLocating, Preferences.shared.solarLocationSource == .precise else { return }

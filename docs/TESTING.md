@@ -1,5 +1,22 @@
 # Testing and validation
 
+## Current efficiency changes — 2026-11-05
+
+These changes were implemented and reviewed from source only, at the user's request to avoid
+builds, app launches, tests, dependency downloads, and cache recreation. The validation records
+below describe earlier releases and do not certify the current changes. No measured RAM/CPU
+reduction or resolution of the reported roughly 350 MB footprint is claimed.
+
+When runtime validation is authorized, cover the real status-item popover separately from the
+Debug window: repeated open/close cycles, native picker menus, Escape/outside-click dismissal,
+IP confirmation, resizing across modes, and unsaved slot edits/setup progress after reopening.
+Exercise short/global/slot timeouts, input restoration after the timeout is removed, continuous
+preview dragging, clock/DST/time-zone changes, partial hardware failures/retries, sleep/wake,
+and normal-quit restoration. Compare the same release configuration and settings at launch and
+after at least an hour, with settings closed and after repeated menu use; inspect retained hosting
+controllers/menus separately from system framework caches. Do not treat allocator high-water
+memory alone as proof that live view objects remain retained.
+
 ## Automated checks
 
 ```sh

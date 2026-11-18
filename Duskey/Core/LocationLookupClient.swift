@@ -33,6 +33,9 @@ enum LocationLookupClient {
             throw LocationLookupError.responseTooLarge
         }
         var data = Data()
+        if response.expectedContentLength > 0 {
+            data.reserveCapacity(Int(response.expectedContentLength))
+        }
         for try await byte in bytes {
             try Task.checkCancellation()
             guard data.count < LocationResponseParser.maximumResponseBytes else {
